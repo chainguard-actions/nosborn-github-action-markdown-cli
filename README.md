@@ -1,1 +1,39 @@
-# nosborn-github-action-markdown-cli
+# github-action-markdown-cli
+
+A GitHub Action that performs style checking and linting for Markdown/CommonMark files using [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli).
+
+[![CI Workflow Status](https://github.com/nosborn/github-action-markdown-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/nosborn/github-action-markdown-cli/actions/workflows/ci.yml)
+[![Release Workflow Status](https://github.com/nosborn/github-action-markdown-cli/actions/workflows/release.yml/badge.svg)](https://github.com/nosborn/github-action-markdown-cli/actions/workflows/release.yml)
+
+## Usage
+
+Basic usage with all options enabled:
+
+```yaml
+
+      - name: markdownlint-cli
+        uses: nosborn/github-action-markdown-cli@v3.0.1
+        with:
+          files: .
+          config_file: .markdownlint.yaml
+          ignore_files: examples/ignore/*
+          ignore_path: examples/.markdownlintignore
+          rules: examples/rules/custom.js
+
+```
+
+## Inputs
+
+* `files` - what to process (files, directories, globs)
+* `config_file` (optional) - configuration file (JSON or YAML)
+* `ignore_files` (optional) - files to ignore/exclude (file, directory, glob)
+* `ignore_path` (optional) - path to file with ignore pattern(s)
+* `rules` (optional) - custom rule files (file, directory, glob, package)
+
+## License
+
+The scripts and documentation in this project are released under the [MIT License](./LICENSE).
+
+## Privacy
+
+This Action contacts Chainguard's licensing server to verify authorization. Connection metadata (IP address, GitHub repository identifier, timestamp, and any metadata encoded in the auth token) is transmitted to Chainguard, Inc. even if authorization is denied in accordance with our [Privacy Notice](https://www.chainguard.dev/legal/privacy-notice)
