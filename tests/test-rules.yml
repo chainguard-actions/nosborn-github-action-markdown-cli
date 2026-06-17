@@ -1,0 +1,44 @@
+name: Test rules input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create markdown file and custom rule
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-rules"
+          # Valid markdown file
+          cat > "$GITHUB_WORKSPACE/test-rules/sample.md" << 'EOF'
+          # Sample Document
+
+          This is a sample markdown file.
+
+          ## Section
+
+          Content here.
+          EOF
+          # Custom markdownlint rule that always passes
+          cat > "$GITHUB_WORKSPACE/test-rules/custom-rule.js" << 'EOF'
+          module.exports = {
+            names: ["custom-always-pass"],
+            description: "A custom rule that always passes",
+            tags: ["test"],
+            function: function rule(params, onError) {
+              // Never calls onError, so always passes
+            }
+          };
+          EOF
+
+      - name: Run markdownlint with custom rules file
+        id: action
+        uses: .
+        with:
+          files: test-rules/sample.md
+          rules: test-rules/custom-rule.js
+
+      - name: Assert action succeeded with custom rule loaded
+        run: |
+          echo "PASS: markdownlint ran successfully with custom rules input"

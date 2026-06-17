@@ -1,15 +1,39 @@
-# nosborn/github-action-markdown-cli
+# github-action-markdown-cli
 
-Style checker and lint tool for Markdown/CommonMark files.
+A GitHub Action that performs style checking and linting for Markdown/CommonMark files using [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli).
 
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/nosborn/github-action-markdown-cli](https://github.com/nosborn/github-action-markdown-cli).
+[![CI Workflow Status](https://github.com/nosborn/github-action-markdown-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/nosborn/github-action-markdown-cli/actions/workflows/ci.yml)
+[![Release Workflow Status](https://github.com/nosborn/github-action-markdown-cli/actions/workflows/release.yml/badge.svg)](https://github.com/nosborn/github-action-markdown-cli/actions/workflows/release.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/nosborn/github-action-markdown-cli/badge)](https://scorecard.dev/viewer/?uri=github.com/nosborn/github-action-markdown-cli)
 
-## Versions
+## Usage
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v3.1.0 | [`v3.1.0`](https://github.com/chainguard-actions/nosborn-github-action-markdown-cli/tree/v3.1.0) | [`55c885e`](https://github.com/nosborn/github-action-markdown-cli/commit/55c885e91c3f2602f966095b30ee2a5284e63fca) |
-| v3.3.0 | [`v3.3.0`](https://github.com/chainguard-actions/nosborn-github-action-markdown-cli/tree/v3.3.0) | [`9b5e871`](https://github.com/nosborn/github-action-markdown-cli/commit/9b5e871c11cc0649c5ac2526af22e23525fa344d) |
+Basic usage with all options enabled:
+
+```yaml
+- name: markdownlint-cli
+  uses: nosborn/github-action-markdown-cli@v3.5.0
+  with:
+    files: .
+    config_file: .markdownlint.yaml
+    dot: true
+    ignore_files: examples/ignore/*
+    ignore_path: examples/.markdownlintignore
+    rules: examples/rules/custom.js
+```
+
+## Inputs
+
+- `files` - what to process (files, directories, globs)
+- `config_file` (optional) - configuration file (JSON or YAML)
+- `dot` (optional) - include files/folders with a dot (for example `.github`)
+- `ignore_files` (optional) - files to ignore/exclude (file, directory, glob)
+- `ignore_path` (optional) - path to file with ignore pattern(s)
+- `rules` (optional) - custom rule files (file, directory, glob, package)
+
+## License
+
+The scripts and documentation in this project are released under the [MIT License](./LICENSE).
 
 ## Privacy
 

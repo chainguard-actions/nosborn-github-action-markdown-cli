@@ -1,0 +1,32 @@
+name: Test dot input includes hidden files
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create valid markdown in a dot directory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-dot/.hidden"
+          cat > "$GITHUB_WORKSPACE/test-dot/.hidden/notes.md" << 'EOF'
+          # Hidden Notes
+
+          This file is in a hidden directory.
+
+          ## Details
+
+          Some content here.
+          EOF
+
+      - name: Run markdownlint with dot flag to include hidden directories
+        id: action
+        uses: .
+        with:
+          files: test-dot
+          dot: "true"
+
+      - name: Assert action succeeded with dot flag
+        run: |
+          echo "PASS: markdownlint successfully linted files in hidden directories"

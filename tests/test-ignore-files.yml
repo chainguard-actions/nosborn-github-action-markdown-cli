@@ -1,0 +1,36 @@
+name: Test ignore files input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create valid and invalid markdown files
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-ignore"
+          # Valid file
+          cat > "$GITHUB_WORKSPACE/test-ignore/good.md" << 'EOF'
+          # Good File
+
+          This file is valid markdown.
+
+          ## Section
+
+          Content here.
+          EOF
+          # Invalid file (missing blank lines after headings)
+          printf '# Bad\nNo blank line\n## Sub\nContent\n' \
+            > "$GITHUB_WORKSPACE/test-ignore/bad.md"
+
+      - name: Run markdownlint ignoring the bad file (should pass)
+        id: action
+        uses: .
+        with:
+          files: test-ignore
+          ignore_files: test-ignore/bad.md
+
+      - name: Assert action succeeded when bad file is ignored
+        run: |
+          echo "PASS: markdownlint passed because bad file was ignored"

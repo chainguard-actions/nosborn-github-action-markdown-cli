@@ -1,0 +1,32 @@
+name: Test custom config file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create markdown file and permissive config
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-config"
+          # Create a config that disables most rules
+          cat > "$GITHUB_WORKSPACE/test-config/.markdownlintrc" << 'EOF'
+          {
+            "default": false
+          }
+          EOF
+          # Create a markdown file that would normally fail (e.g. missing blank lines)
+          printf '# Heading\nNo blank line after heading\n## Sub\nContent\n' \
+            > "$GITHUB_WORKSPACE/test-config/file.md"
+
+      - name: Run markdownlint with permissive config (should pass)
+        id: action
+        uses: .
+        with:
+          files: test-config/file.md
+          config_file: test-config/.markdownlintrc
+
+      - name: Assert action succeeded with custom config
+        run: |
+          echo "PASS: markdownlint passed with permissive custom config"
