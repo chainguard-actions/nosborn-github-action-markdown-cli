@@ -1,0 +1,30 @@
+---
+name: Test ignore_files input - exclude files from linting
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create test files
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-ignore"
+          # Create a valid markdown file
+          printf '# Valid Markdown\n\nThis is a valid markdown file.\n\n## Section\n\nSome content here.\n' \
+            > "$GITHUB_WORKSPACE/tests/tmp-ignore/valid.md"
+          # Create an invalid markdown file (MD041: no top-level heading, MD022: missing blank lines)
+          printf '## No top-level heading\nsome text\n## Another heading\n' \
+            > "$GITHUB_WORKSPACE/tests/tmp-ignore/invalid.md"
+
+      - name: Run markdownlint on directory, ignoring the invalid file
+        id: action
+        uses: .
+        with:
+          files: tests/tmp-ignore
+          ignore_files: tests/tmp-ignore/invalid.md
+
+      - name: Assert action succeeded (invalid file was ignored)
+        run: |
+          echo "PASS: markdownlint passed because invalid file was ignored"

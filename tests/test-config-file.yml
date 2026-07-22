@@ -1,0 +1,31 @@
+---
+name: Test config_file input - custom configuration
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create test files
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-config"
+          # Create a markdown file that would normally fail MD041 (no top-level heading)
+          # and MD022 (headings not surrounded by blank lines)
+          printf '## No top-level heading\nsome text\n## Another heading\nmore text\n' \
+            > "$GITHUB_WORKSPACE/tests/tmp-config/test.md"
+          # Create a permissive config that disables all rules
+          printf '{"default": false}\n' \
+            > "$GITHUB_WORKSPACE/tests/tmp-config/.markdownlintrc"
+
+      - name: Run markdownlint with custom config (all rules disabled)
+        id: action
+        uses: .
+        with:
+          files: tests/tmp-config/test.md
+          config_file: tests/tmp-config/.markdownlintrc
+
+      - name: Assert action succeeded with permissive config
+        run: |
+          echo "PASS: markdownlint passed with all rules disabled via custom config"

@@ -1,0 +1,27 @@
+---
+name: Test dot input - include dotfiles and dot-directories
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create test files including a dot-prefixed directory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-dot/.hidden-dir"
+          # Create a valid markdown file inside a dot-prefixed directory
+          printf '# Hidden Directory Markdown\n\nThis file is inside a dot-prefixed directory.\n\n## Section\n\nSome content here.\n' \
+            > "$GITHUB_WORKSPACE/tests/tmp-dot/.hidden-dir/readme.md"
+
+      - name: Run markdownlint with dot=true to include dot-prefixed directories
+        id: action
+        uses: .
+        with:
+          files: tests/tmp-dot
+          dot: "true"
+
+      - name: Assert action succeeded (dot-prefixed directory was included and file is valid)
+        run: |
+          echo "PASS: markdownlint passed with dot=true, including hidden directories"

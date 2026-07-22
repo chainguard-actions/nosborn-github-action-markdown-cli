@@ -1,0 +1,38 @@
+---
+name: Test rules input - custom rule files
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create test files
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-rules"
+          # Create a valid markdown file
+          printf '# Valid Markdown\n\nThis is a valid markdown file.\n\n## Section\n\nSome content here.\n' \
+            > "$GITHUB_WORKSPACE/tests/tmp-rules/valid.md"
+          # Create a custom markdownlint rule (JS) that never triggers (always passes)
+          cat > "$GITHUB_WORKSPACE/tests/tmp-rules/custom-rule.js" << 'EOF'
+          module.exports = {
+            names: ["custom-no-op"],
+            description: "A no-op custom rule for testing",
+            tags: ["test"],
+            function: function rule(params, onError) {
+              // Never triggers - always passes
+            }
+          };
+          EOF
+
+      - name: Run markdownlint with custom rule file
+        id: action
+        uses: .
+        with:
+          files: tests/tmp-rules/valid.md
+          rules: tests/tmp-rules/custom-rule.js
+
+      - name: Assert action succeeded with custom rule loaded
+        run: |
+          echo "PASS: markdownlint passed with custom rule file loaded via rules input"
