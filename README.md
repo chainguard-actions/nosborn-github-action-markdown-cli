@@ -9,6 +9,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
 | v3.1.0 | [`v3.1.0`](https://github.com/chainguard-actions/nosborn-github-action-markdown-cli/tree/v3.1.0) | [`55c885e`](https://github.com/nosborn/github-action-markdown-cli/commit/55c885e91c3f2602f966095b30ee2a5284e63fca) |
+| v3.2.0 | [`v3.2.0`](https://github.com/chainguard-actions/nosborn-github-action-markdown-cli/tree/v3.2.0) | [`5cfe137`](https://github.com/nosborn/github-action-markdown-cli/commit/5cfe13755d7cdc2d0d01b69c7900cfd3fa37f4a4) |
 | v3.3.0 | [`v3.3.0`](https://github.com/chainguard-actions/nosborn-github-action-markdown-cli/tree/v3.3.0) | [`9b5e871`](https://github.com/nosborn/github-action-markdown-cli/commit/9b5e871c11cc0649c5ac2526af22e23525fa344d) |
 | v3.5.0 | [`v3.5.0`](https://github.com/chainguard-actions/nosborn-github-action-markdown-cli/tree/v3.5.0) | [`508d6ce`](https://github.com/nosborn/github-action-markdown-cli/commit/508d6cefd8f0cc99eab5d2d4685b1d5f470042c1) |
 
