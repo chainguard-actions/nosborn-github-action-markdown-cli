@@ -1,4 +1,5 @@
-name: Test rules input
+---
+name: Test rules input (custom rule file)
 on:
   workflow_dispatch:
 jobs:
@@ -9,36 +10,36 @@ jobs:
 
       - name: Create markdown file and custom rule
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/test-rules"
-          # Valid markdown file
-          cat > "$GITHUB_WORKSPACE/test-rules/sample.md" << 'EOF'
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-rules"
+          # Create a simple valid markdown file
+          cat > "$GITHUB_WORKSPACE/tests/tmp-rules/sample.md" << 'EOF'
           # Sample Document
 
-          This is a sample markdown file.
+          This is a sample markdown file for testing custom rules.
 
           ## Section
 
           Content here.
           EOF
-          # Custom markdownlint rule that always passes
-          cat > "$GITHUB_WORKSPACE/test-rules/custom-rule.js" << 'EOF'
+          # Create a custom markdownlint rule (no-op rule that never fires)
+          cat > "$GITHUB_WORKSPACE/tests/tmp-rules/custom-rule.js" << 'EOF'
           module.exports = {
-            names: ["custom-always-pass"],
-            description: "A custom rule that always passes",
+            names: ["custom-noop"],
+            description: "A no-op custom rule for testing",
             tags: ["test"],
             function: function rule(params, onError) {
-              // Never calls onError, so always passes
+              // This rule never triggers any errors
             }
           };
           EOF
 
-      - name: Run markdownlint with custom rules file
+      - name: Run markdownlint with custom rules input
         id: action
         uses: .
         with:
-          files: test-rules/sample.md
-          rules: test-rules/custom-rule.js
+          files: tests/tmp-rules/sample.md
+          rules: tests/tmp-rules/custom-rule.js
 
-      - name: Assert action succeeded with custom rule loaded
+      - name: Assert action succeeded with custom rule
         run: |
-          echo "PASS: markdownlint ran successfully with custom rules input"
+          echo "PASS: markdownlint passed with custom rule file provided via rules input"

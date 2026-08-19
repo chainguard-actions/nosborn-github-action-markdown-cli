@@ -1,0 +1,35 @@
+---
+name: Test config file input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create markdown file and custom config
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-config"
+          # Create a markdown file that would normally fail MD041 (first line not heading)
+          # and MD022 (headings not surrounded by blank lines)
+          printf 'Some text without a heading first\n## Heading without blank line above\nMore text\n' \
+            > "$GITHUB_WORKSPACE/tests/tmp-config/test.md"
+          # Create a config that disables those rules
+          cat > "$GITHUB_WORKSPACE/tests/tmp-config/.markdownlintrc" << 'EOF'
+          {
+            "MD041": false,
+            "MD022": false
+          }
+          EOF
+
+      - name: Run markdownlint with custom config that disables failing rules
+        id: action
+        uses: .
+        with:
+          files: tests/tmp-config/test.md
+          config_file: tests/tmp-config/.markdownlintrc
+
+      - name: Assert action succeeded with custom config
+        run: |
+          echo "PASS: markdownlint passed with custom config disabling specific rules"

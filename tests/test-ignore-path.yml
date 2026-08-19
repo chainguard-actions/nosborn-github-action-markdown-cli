@@ -1,3 +1,4 @@
+---
 name: Test ignore_path input
 on:
   workflow_dispatch:
@@ -7,32 +8,33 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Create valid and invalid markdown files plus ignore path file
+      - name: Create markdown files and ignore-path file
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/test-ignorepath"
-          # Valid file
-          cat > "$GITHUB_WORKSPACE/test-ignorepath/good.md" << 'EOF'
-          # Good File
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-ignore-path"
+          # Valid markdown file
+          cat > "$GITHUB_WORKSPACE/tests/tmp-ignore-path/valid.md" << 'EOF'
+          # Valid Markdown
 
-          This file is valid markdown.
+          This is a valid markdown file.
 
           ## Section
 
           Content here.
           EOF
-          # Invalid file (missing blank line after heading)
-          printf '# Bad\nNo blank line after heading\n## Sub\nContent\n' \
-            > "$GITHUB_WORKSPACE/test-ignorepath/bad.md"
-          # Ignore file listing the bad file
-          echo "test-ignorepath/bad.md" > "$GITHUB_WORKSPACE/test-ignorepath/.ignorefile"
+          # Invalid markdown file (missing blank line after heading, etc.)
+          printf '# Heading\nNo blank line after heading\n## Sub\nContent\n' \
+            > "$GITHUB_WORKSPACE/tests/tmp-ignore-path/invalid.md"
+          # Create the ignore-patterns file listing the invalid file
+          echo "tests/tmp-ignore-path/invalid.md" \
+            > "$GITHUB_WORKSPACE/tests/tmp-ignore-path/.markdownlintignore"
 
-      - name: Run markdownlint with ignore_path pointing to ignore file (should pass)
+      - name: Run markdownlint with ignore_path (invalid file should be ignored)
         id: action
         uses: .
         with:
-          files: test-ignorepath
-          ignore_path: test-ignorepath/.ignorefile
+          files: tests/tmp-ignore-path
+          ignore_path: tests/tmp-ignore-path/.markdownlintignore
 
-      - name: Assert action succeeded when bad file is excluded via ignore_path
+      - name: Assert action succeeded (invalid file was ignored via ignore_path)
         run: |
-          echo "PASS: markdownlint passed because bad file was excluded via ignore_path"
+          echo "PASS: markdownlint passed because invalid file was excluded via ignore_path"

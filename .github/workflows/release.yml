@@ -1,0 +1,47 @@
+# yamllint disable rule:line-length
+---
+name: Release
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: true
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Check embedded version numbers
+        run: |
+          version="$(grep -F "uses: ${GITHUB_REPOSITORY}@" README.md | cut -d@ -f2)"
+          if [[ ${version} != "${GITHUB_REF_NAME}" ]]; then
+            line="$(grep -Fn "uses: ${GITHUB_REPOSITORY}@" README.md | cut -d: -f1)"
+            printf '::error file=README.md,line=%d::version does not match tag\n' "${line}"
+            rc=1
+          fi
+          if [[ $(jq -r .version package.json) != "${GITHUB_REF_NAME#v}" ]]; then
+            line="$(grep -Fn '"version":' package.json | cut -d: -f1)"
+            printf '::error file=package.json,line=%d::version does not match tag\n' "${line}"
+            rc=1
+          fi
+          exit "${rc:-0}"
+
+      - name: Create the release
+        run: |
+          gh release create "${GITHUB_REF_NAME}" --fail-on-no-commits --generate-notes --verify-tag \
+            --draft # FIXME
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
