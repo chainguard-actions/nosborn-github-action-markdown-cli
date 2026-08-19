@@ -1,0 +1,59 @@
+# yamllint disable rule:line-length
+---
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
+      - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4.5.0
+        with:
+          python-version: 3.x
+      - uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+
+  local-test:
+    needs: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
+      - name: Test problem matcher
+        id: expect-failure
+        uses: ./
+        with:
+          config_file: .markdownlintrc
+          files: .
+          rules: examples/rules/custom.js
+        continue-on-error: true
+      - if: ${{ steps.expect-failure.outcome != 'failure' }}
+        run: |
+          exit 1
+      - name: Test ignore_files
+        uses: ./
+        with:
+          config_file: .markdownlintrc
+          files: .
+          ignore_files: examples/ignore/*
+          rules: examples/rules/custom.js
+      - name: Test ignore_path
+        uses: ./
+        with:
+          config_file: .markdownlintrc
+          files: .
+          ignore_path: examples/.markdownlintignore
+          rules: examples/rules/custom.js

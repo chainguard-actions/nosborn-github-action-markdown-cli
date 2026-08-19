@@ -1,3 +1,4 @@
+---
 name: Test ignore_files input
 on:
   workflow_dispatch:
@@ -6,17 +7,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run markdownlint ignoring a specific file
+
+      - name: Create markdown files - one valid, one invalid
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-ignore"
+
+          # Valid markdown file
+          cat > "$GITHUB_WORKSPACE/tests/tmp-ignore/good.md" << 'EOF'
+          # Good Markdown
+
+          This is a valid markdown file.
+
+          ## Section
+
+          - Item one
+          - Item two
+          EOF
+
+          # Invalid markdown file (MD041: no top-level heading, MD022: missing blank lines)
+          printf '## Bad heading\nNo blank line\n- item\n' \
+            > "$GITHUB_WORKSPACE/tests/tmp-ignore/bad.md"
+
+      - name: Run markdownlint on directory, ignoring the bad file
         id: action
         uses: .
         with:
-          files: >-
-            ${{ github.workspace }}/actions/hardened/nosborn--github-action-markdown-cli/v3.3.0/tests/fixtures
-          ignore_files: >-
-            ${{ github.workspace }}/actions/hardened/nosborn--github-action-markdown-cli/v3.3.0/tests/fixtures/ignored.md
-          config_file: >-
-            ${{ github.workspace }}/actions/hardened/nosborn--github-action-markdown-cli/v3.3.0/tests/fixtures/config/.markdownlint.json
-      - name: Assert action succeeded with ignore_files
+          files: tests/tmp-ignore
+          ignore_files: tests/tmp-ignore/bad.md
+
+      - name: Assert action succeeded (bad file was ignored)
         run: |
-          echo "Action completed successfully with ignore_files"
-          echo "PASS"
+          echo "PASS: markdownlint succeeded because the invalid file was ignored"

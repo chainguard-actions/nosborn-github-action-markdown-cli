@@ -1,4 +1,5 @@
-name: Test basic usage (files input)
+---
+name: Test basic usage - valid markdown
 on:
   workflow_dispatch:
 jobs:
@@ -6,13 +7,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run markdownlint on valid markdown file
+
+      - name: Create a valid markdown file
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-basic"
+          cat > "$GITHUB_WORKSPACE/tests/tmp-basic/valid.md" << 'EOF'
+          # Valid Markdown
+
+          This is a valid markdown file.
+
+          ## Section Two
+
+          - Item one
+          - Item two
+          - Item three
+          EOF
+
+      - name: Run markdownlint on valid file
         id: action
         uses: .
         with:
-          files: >-
-            ${{ github.workspace }}/actions/hardened/nosborn--github-action-markdown-cli/v3.3.0/tests/fixtures/valid.md
+          files: tests/tmp-basic/valid.md
+
       - name: Assert action succeeded
         run: |
-          echo "Action completed successfully"
-          echo "PASS"
+          echo "PASS: markdownlint ran successfully on valid markdown"

@@ -1,4 +1,5 @@
-name: Test config_file input
+---
+name: Test config file input
 on:
   workflow_dispatch:
 jobs:
@@ -6,15 +7,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run markdownlint with config file
+
+      - name: Create markdown file and custom config
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-config"
+
+          # Config that disables MD013 (line length) and MD041 (first line heading)
+          cat > "$GITHUB_WORKSPACE/tests/tmp-config/.markdownlintrc" << 'EOF'
+          {
+            "MD013": false,
+            "MD041": false
+          }
+          EOF
+
+          # Markdown file that would fail MD041 (no top-level heading) without config
+          cat > "$GITHUB_WORKSPACE/tests/tmp-config/content.md" << 'EOF'
+          ## Secondary Heading
+
+          This file starts with a secondary heading which would normally violate MD041,
+          but the config disables that rule. This line is also quite long and would
+          normally violate MD013 but that rule is also disabled.
+
+          - Item one
+          - Item two
+          EOF
+
+      - name: Run markdownlint with custom config
         id: action
         uses: .
         with:
-          files: >-
-            ${{ github.workspace }}/actions/hardened/nosborn--github-action-markdown-cli/v3.3.0/tests/fixtures/valid.md
-          config_file: >-
-            ${{ github.workspace }}/actions/hardened/nosborn--github-action-markdown-cli/v3.3.0/tests/fixtures/config/.markdownlint.json
-      - name: Assert action succeeded with config
+          config_file: tests/tmp-config/.markdownlintrc
+          files: tests/tmp-config/content.md
+
+      - name: Assert action succeeded with custom config
         run: |
-          echo "Action completed successfully with config_file"
-          echo "PASS"
+          echo "PASS: markdownlint ran successfully with custom config that disables MD041 and MD013"

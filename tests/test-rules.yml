@@ -1,4 +1,5 @@
-name: Test rules input (custom rule files)
+---
+name: Test rules input - custom rule file
 on:
   workflow_dispatch:
 jobs:
@@ -6,15 +7,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run markdownlint with custom rules
+
+      - name: Create markdown file and custom rule
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/tmp-rules"
+
+          # Valid markdown file with no blockquotes (passes the custom rule)
+          cat > "$GITHUB_WORKSPACE/tests/tmp-rules/valid.md" << 'EOF'
+          # Valid Markdown
+
+          This file has no blockquotes, so the custom rule will not trigger.
+
+          ## Section
+
+          - Item one
+          - Item two
+          EOF
+
+          # Custom rule: reports an error for any blockquote
+          cat > "$GITHUB_WORKSPACE/tests/tmp-rules/no-blockquotes.js" << 'EOF'
+          "use strict";
+          module.exports = {
+            "names": ["custom-no-blockquote"],
+            "description": "Rule that reports an error for any blockquote",
+            "tags": ["test"],
+            "function": function rule(params, onError) {
+              params.tokens.filter(function(token) {
+                return token.type === "blockquote_open";
+              }).forEach(function(blockquote) {
+                onError({
+                  "lineNumber": blockquote.lineNumber,
+                  "detail": "Blockquote not allowed."
+                });
+              });
+            }
+          };
+          EOF
+
+      - name: Run markdownlint with custom rule on file without blockquotes
         id: action
         uses: .
         with:
-          files: >-
-            ${{ github.workspace }}/actions/hardened/nosborn--github-action-markdown-cli/v3.3.0/tests/fixtures/valid.md
-          rules: >-
-            ${{ github.workspace }}/actions/hardened/nosborn--github-action-markdown-cli/v3.3.0/tests/fixtures/custom-rule.js
-      - name: Assert action succeeded with custom rules
+          files: tests/tmp-rules/valid.md
+          rules: tests/tmp-rules/no-blockquotes.js
+
+      - name: Assert action succeeded (no blockquotes, custom rule passes)
         run: |
-          echo "Action completed successfully with custom rules"
-          echo "PASS"
+          echo "PASS: markdownlint succeeded with custom rule applied to file without blockquotes"
