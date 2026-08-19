@@ -1,3 +1,4 @@
+---
 name: Test ignore_path input
 on:
   workflow_dispatch:
@@ -6,12 +7,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run markdownlint with ignore_path pointing to ignore list file
+
+      - name: Create markdown files and ignore pattern file
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-ignorepath"
+
+          # Valid markdown file that should be linted
+          cat > "$GITHUB_WORKSPACE/test-ignorepath/good.md" << 'EOF'
+          # Good File
+
+          This file is valid markdown.
+
+          ## Section
+
+          Content here.
+          EOF
+
+          # Invalid markdown file that should be ignored via ignore path
+          cat > "$GITHUB_WORKSPACE/test-ignorepath/skip-me.md" << 'EOF'
+          ## Not a top-level heading first
+          Text without blank line
+          ### Another heading without blank line
+          EOF
+
+          # Create the ignore pattern file
+          cat > "$GITHUB_WORKSPACE/test-ignorepath/.markdownignore" << 'EOF'
+          test-ignorepath/skip-me.md
+          EOF
+
+      - name: Run markdownlint with ignore_path
         id: action
         uses: .
         with:
-          files: tests/fixtures
-          ignore_path: tests/fixtures/ignorelist.txt
-      - name: Assert action succeeded
-        run: |
-          echo "PASS: markdownlint ran successfully with ignore_path set"
+          files: test-ignorepath
+          ignore_path: test-ignorepath/.markdownignore

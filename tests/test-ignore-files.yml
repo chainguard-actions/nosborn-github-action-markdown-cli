@@ -1,4 +1,5 @@
-name: Test ignore_files input
+---
+name: Test ignore files input
 on:
   workflow_dispatch:
 jobs:
@@ -6,12 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run markdownlint with ignore_files to skip a problematic file
+
+      - name: Run markdownlint with bad file ignored
         id: action
         uses: .
         with:
-          files: tests/fixtures
-          ignore_files: tests/fixtures/ignored.md
-      - name: Assert action succeeded
+          files: tests/fixtures/valid.md tests/fixtures/bad-ignored.md
+          ignore_files: tests/fixtures/bad-ignored.md
+
+      - name: Assert action succeeded (bad file was ignored)
         run: |
-          echo "PASS: markdownlint ran successfully with ignore_files set"
+          echo "Action completed successfully with ignored file (exit 0)"
+          echo "PASS"

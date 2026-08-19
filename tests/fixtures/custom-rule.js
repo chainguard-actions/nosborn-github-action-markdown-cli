@@ -1,9 +1,9 @@
-// Custom markdownlint rule for testing
+// Custom markdownlint rule fixture for testing the 'rules' input
 module.exports = {
   names: ["custom-test-rule"],
-  description: "A custom test rule that never fires",
+  description: "A custom test rule that always passes",
   tags: ["test"],
   function: function rule(params, onError) {
-    // This rule never fires - it's just for testing the rules input
+    // No violations — this rule always passes
   }
 };
